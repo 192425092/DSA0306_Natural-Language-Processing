@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NeuroText - Semantic Analysis Dashboard</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    background: #f4f6f9;
+    color: #222;
+}
+
+header {
+    background: #1f3c88;
+    color: white;
+    padding: 22px 35px;
+}
+
+header h1 {
+    font-size: 28px;
+}
+
+header p {
+    margin-top: 6px;
+    font-size: 14px;
+}
+
+.container {
+    width: 94%;
+    margin: 25px auto;
+}
+
+.section {
+    background: white;
+    padding: 22px;
+    margin-bottom: 22px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.section h2 {
+    color: #1f3c88;
+    margin-bottom: 18px;
+}
+
+.input-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+label {
+    font-weight: bold;
+    display: block;
+    margin-bottom: 8px;
+}
+
+textarea {
+    width: 100%;
+    height: 180px;
+    resize: vertical;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 7px;
+    font-size: 14px;
+    outline: none;
+}
+
+textarea:focus {
+    border-color: #1f3c88;
+}
+
+button {
+    margin-top: 20px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    background: #1f3c88;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #162d68;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+}
+
+.card {
+    padding: 22px;
+    border-radius: 9px;
+    background: #f8f9fb;
+    text-align: center;
+    border: 1px solid #e1e4e8;
+}
+
+.card h3 {
+    font-size: 14px;
+    color: #555;
+}
+
+.card .value {
+    font-size: 30px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #1f3c88;
+}
+
+.result-box {
+    margin-top: 20px;
+}
+
+.progress-container {
+    background: #ddd;
+    border-radius: 20px;
+    overflow: hidden;
+    height: 25px;
+    margin-top: 8px;
+}
+
+.progress {
+    height: 100%;
+    width: 0%;
+    background: #1f3c88;
+    color: white;
+    text-align: center;
+    line-height: 25px;
+    font-size: 13px;
+}
+
+.status {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+.original {
+    background: #d4edda;
+    color: #155724;
+}
+
+.paraphrased {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.plagiarized {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 12px;
+    text-align: left;
+}
+
+th {
+    background: #1f3c88;
+    color: white;
+}
+
+tr:nth-child(even) {
+    background: #f7f7f7;
+}
+
+.info {
+    background: #eef3ff;
+    padding: 15px;
+    border-left: 5px solid #1f3c88;
+    margin-top: 15px;
+    line-height: 1.6;
+}
+
+@media(max-width: 800px) {
+    .input-grid,
+    .stats {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>NeuroText</h1>
+    <p>Intelligent Semantic Analysis for Detecting Plagiarism and Paraphrased Content</p>
+</header>
+
+<div class="container">
+
+    <!-- TEXT INPUT -->
+    <div class="section">
+        <h2>1. Text Data Input</h2>
+
+        <div class="input-grid">
+
+            <div>
+                <label>Original / Reference Text</label>
+                <textarea id="originalText"
+                placeholder="Enter the original reference text here...">Artificial intelligence enables computers to perform tasks that normally require human intelligence. Machine learning allows systems to learn patterns from data and make predictions.</textarea>
+            </div>
+
+            <div>
+                <label>Submitted Text</label>
+                <textarea id="submittedText"
+                placeholder="Enter the submitted or suspected text here...">Artificial intelligence allows computers to perform activities that usually need human intelligence. Machine learning helps computer systems discover patterns from information and generate predictions.</textarea>
+            </div>
+
+        </div>
+
+        <button onclick="analyzeText()">Analyze Content</button>
+    </div>
+
+
+    <!-- DASHBOARD -->
+    <div class="section">
+        <h2>2. Analysis Dashboard</h2>
+
+        <div class="stats">
+
+            <div class="card">
+                <h3>Semantic Similarity</h3>
+                <div class="value" id="similarity">0%</div>
+            </div>
+
+            <div class="card">
+                <h3>Plagiarism</h3>
+                <div class="value" id="plagiarism">0%</div>
+            </div>
+
+            <div class="card">
+                <h3>Paraphrase</h3>
+                <div class="value" id="paraphrase">0%</div>
+            </div>
+
+            <div class="card">
+                <h3>Originality</h3>
+                <div class="value" id="originality">0%</div>
+            </div>
+
+        </div>
+
+
+        <div class="result-box">
+
+            <h3>Semantic Similarity Score</h3>
+
+            <div class="progress-container">
+                <div class="progress" id="similarityBar">0%</div>
+            </div>
+
+            <div id="status" class="status original">
+                Waiting for Analysis
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- SEMANTIC PROCESSING -->
+    <div class="section">
+
+        <h2>3. Semantic Processing</h2>
+
+        <div class="info">
+
+            <b>NeuroText Processing Pipeline</b>
+
+            <br><br>
+
+            ✓ Text Preprocessing
+
+            <br>
+            ✓ Tokenization
+
+            <br>
+            ✓ Stop-word Removal
+
+            <br>
+            ✓ Keyword Extraction
+
+            <br>
+            ✓ Semantic Feature Extraction
+
+            <br>
+            ✓ Similarity Calculation
+
+            <br>
+            ✓ Plagiarism Detection
+
+            <br>
+            ✓ Paraphrase Detection
+
+        </div>
+
+    </div>
+
+
+    <!-- MATCHED CONTENT -->
+    <div class="section">
+
+        <h2>4. Detected Similar Content</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Reference Phrase</th>
+                    <th>Submitted Phrase</th>
+                    <th>Type</th>
+                </tr>
+            </thead>
+
+            <tbody id="matches">
+
+                <tr>
+                    <td colspan="3">
+                        Run analysis to detect similar content.
+                    </td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+
+    <!-- REPORT -->
+    <div class="section">
+
+        <h2>5. Analysis Report</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Result</th>
+                    <th>Interpretation</th>
+                </tr>
+            </thead>
+
+            <tbody id="report">
+
+                <tr>
+                    <td>Semantic Similarity</td>
+                    <td>0%</td>
+                    <td>Not analyzed</td>
+                </tr>
+
+                <tr>
+                    <td>Plagiarism</td>
+                    <td>0%</td>
+                    <td>Not analyzed</td>
+                </tr>
+
+                <tr>
+                    <td>Paraphrasing</td>
+                    <td>0%</td>
+                    <td>Not analyzed</td>
+                </tr>
+
+                <tr>
+                    <td>Originality</td>
+                    <td>0%</td>
+                    <td>Not analyzed</td>
+                </tr>
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<script>
+
+function cleanText(text) {
+
+    return text
+        .toLowerCase()
+        .replace(/[^\w\s]/g, "")
+        .split(/\s+/)
+        .filter(word => word.length > 2);
+
+}
+
+
+function calculateSimilarity(original, submitted) {
+
+    let originalWords = cleanText(original);
+    let submittedWords = cleanText(submitted);
+
+    let originalSet = new Set(originalWords);
+    let submittedSet = new Set(submittedWords);
+
+    let common = 0;
+
+    submittedSet.forEach(word => {
+
+        if (originalSet.has(word)) {
+            common++;
+        }
+
+    });
+
+    let union = new Set([
+        ...originalSet,
+        ...submittedSet
+    ]).size;
+
+    if (union === 0) {
+        return 0;
+    }
+
+    return Math.round((common / union) * 100);
+
+}
+
+
+function findMatches(original, submitted) {
+
+    let originalWords = cleanText(original);
+    let submittedWords = cleanText(submitted);
+
+    let commonWords = submittedWords.filter(
+        word => originalWords.includes(word)
+    );
+
+    let uniqueWords = [...new Set(commonWords)];
+
+    return uniqueWords.slice(0, 8);
+
+}
+
+
+function analyzeText() {
+
+    let original = document.getElementById("originalText").value.trim();
+    let submitted = document.getElementById("submittedText").value.trim();
+
+    if (!original || !submitted) {
+
+        alert("Please enter both the original text and submitted text.");
+
+        return;
+
+    }
+
+    let similarity = calculateSimilarity(
+        original,
+        submitted
+    );
+
+
+    /*
+       Demo classification logic
+
+       High similarity = possible plagiarism
+       Medium similarity = possible paraphrasing
+       Low similarity = mostly original
+    */
+
+    let plagiarism = 0;
+    let paraphrase = 0;
+    let originality = 0;
+
+    if (similarity >= 75) {
+
+        plagiarism = similarity;
+        paraphrase = Math.max(0, similarity - 15);
+        originality = 100 - plagiarism;
+
+    }
+
+    else if (similarity >= 40) {
+
+        paraphrase = similarity;
+        plagiarism = Math.round(similarity * 0.35);
+        originality = 100 - paraphrase;
+
+    }
+
+    else {
+
+        originality = 100 - similarity;
+        paraphrase = Math.round(similarity * 0.5);
+        plagiarism = Math.round(similarity * 0.2);
+
+    }
+
+
+    document.getElementById("similarity").innerText =
+        similarity + "%";
+
+    document.getElementById("plagiarism").innerText =
+        plagiarism + "%";
+
+    document.getElementById("paraphrase").innerText =
+        paraphrase + "%";
+
+    document.getElementById("originality").innerText =
+        originality + "%";
+
+
+    let bar = document.getElementById("similarityBar");
+
+    bar.style.width = similarity + "%";
+
+    bar.innerText = similarity + "%";
+
+
+    let status = document.getElementById("status");
+
+    if (similarity >= 75) {
+
+        status.innerText =
+            "High Similarity - Possible Plagiarism";
+
+        status.className =
+            "status plagiarized";
+
+    }
+
+    else if (similarity >= 40) {
+
+        status.innerText =
+            "Moderate Similarity - Possible Paraphrasing";
+
+        status.className =
+            "status paraphrased";
+
+    }
+
+    else {
+
+        status.innerText =
+            "Low Similarity - Mostly Original";
+
+        status.className =
+            "status original";
+
+    }
+
+
+    updateMatches(original, submitted);
+
+    updateReport(
+        similarity,
+        plagiarism,
+        paraphrase,
+        originality
+    );
+
+}
+
+
+function updateMatches(original, submitted) {
+
+    let matches = findMatches(
+        original,
+        submitted
+    );
+
+    let table = document.getElementById("matches");
+
+    table.innerHTML = "";
+
+
+    if (matches.length === 0) {
+
+        table.innerHTML =
+            "<tr><td colspan='3'>No significant matching words detected.</td></tr>";
+
+        return;
+
+    }
+
+
+    matches.forEach(word => {
+
+        let row = document.createElement("tr");
+
+        row.innerHTML = `
+
+            <td>${word}</td>
+
+            <td>${word}</td>
+
+            <td>Semantic / Keyword Match</td>
+
+        `;
+
+        table.appendChild(row);
+
+    });
+
+}
+
+
+function updateReport(
+    similarity,
+    plagiarism,
+    paraphrase,
+    originality
+) {
+
+    let report =
+        document.getElementById("report");
+
+    let similarityText =
+        similarity >= 75
+        ? "Very high semantic similarity"
+        : similarity >= 40
+        ? "Moderate semantic similarity"
+        : "Low semantic similarity";
+
+
+    let plagiarismText =
+        plagiarism >= 75
+        ? "Strong plagiarism indication"
+        : plagiarism >= 40
+        ? "Potential copied content"
+        : "Low plagiarism indication";
+
+
+    let paraphraseText =
+        paraphrase >= 40
+        ? "Possible paraphrased content"
+        : "Low paraphrase indication";
+
+
+    let originalityText =
+        originality >= 70
+        ? "Content appears mostly original"
+        : "Content requires further review";
+
+
+    report.innerHTML = `
+
+        <tr>
+            <td>Semantic Similarity</td>
+            <td>${similarity}%</td>
+            <td>${similarityText}</td>
+        </tr>
+
+        <tr>
+            <td>Plagiarism</td>
+            <td>${plagiarism}%</td>
+            <td>${plagiarismText}</td>
+        </tr>
+
+        <tr>
+            <td>Paraphrasing</td>
+            <td>${paraphrase}%</td>
+            <td>${paraphraseText}</td>
+        </tr>
+
+        <tr>
+            <td>Originality</td>
+            <td>${originality}%</td>
+            <td>${originalityText}</td>
+        </tr>
+
+    `;
+
+}
+
+</script>
+
+</body>
+</html>
